@@ -462,6 +462,85 @@ public List<CustomerDto> getAllCustomer()
 
 
 
+
+
+
+
+
+
+
+
+
+####################################################################################################################################################################################################################################
+
+
+###########  Unit Test  ###########
+
+unit test: programımızdaki her unitin yani fonksiyonun sahip olduğu her mantıksal noktayı test ettiğimiz test tipi.
+
+Unit Test, bir yazılımın en küçük test edilebilir bölümlerinin, tek tek ve bağımsız olarak doğru çalışması için incelendiği bir yazılım geliştirme sürecidir.
+Unit Test yazılım testinin ilk seviyesidir ve entegrasyon testinden önce gelir.
+
+
+  Neyin Testlerini Yazarız? işlem olan mantıksal her nokta örneğin modelin testi yazılmaz. çünkü herhangi bir işlem yok.
+
+ -- Servis ler
+ -- Converter lar
+ -- Controller lar
+
+
+Örneğin AccountService test edelim
+public AccountDto createAccount(CreateAccountRequest createAccountRequest)
+    {
+
+        Customer customer = customerService.findCustomerById(createAccountRequest.getCustomerId());
+         ...
+         ...
+
+         }
+ve bu servis Customerservice i çağırıyor olsun . Bu çağırımda hangi fonksiyonu kullanıyorum findCustomerById
+
+
+
+                      findCustomerById
+                    ---------------------->
+AccountServiceTest                            CustomerServicesMock
+                    <-----------------------
+                        custom Nesnesi dön
+
+Simulasyonunu yapıyoruz. AccountService ten CustomerServices çağırmıyoruz.Nasıl davranacağını söylüyorum.
+Unit test : Test ettiğim sınıfın sınıfın içerisindeki fonksiyonunu test ettiğim
+Mock Test: Sınıflarımdaki Fonskiyonların dışarıyla olan bağlantılarını simüle ettiğim , mock ladığım teste mock test denir.
+Unit: Test ettiğmiz servis,controller,=> örneğin AccountService Unit dir.Bunun dışındaki herşey unit dışında oluyor onları test etmiyoruz.
+
+!! private ve protected methodlar test EDILMEZ !!
+!! void değer dönen methodlar test EDILMEZ !!
+!! Bunlar dışındaki tüm methodların her bir durumu için ayrı ayrı test senaryoları yazılır. !!
+
+
+____TEST NASIL YAZILIR____
+Test Etmek isteiğimiz sınıfın içerisinde ctrl+shift+T tuşlarına bastık.
+Create new test dedik.
+JUnit4
+Adı : AccounServiceTest
+SuperClass yok
+Destination otomatik atadı
+setup Methodu seçtik
+Ok
+
+
+    AccountServiceTest classının test edeceğimiz  AccountService classıyla bağlantısı yok. Dolayısıyla öncellikle bağlantı kurulur.
+    Test etmek istediğimiz Classın objesi oluşturulur:
+     private AccountService accountService
+
+     Daha sonra test edilecek sınıfın kullanmaıs gereken objelerde buraya eklenir.(private final yapılmasının sebebi aslında budur. Test sınıfında ihtiyacımız olan bu nesneleri service(accountService) objesine ınject edebilelim.)
+
+
+
+
+
+
+
      */
 
 
