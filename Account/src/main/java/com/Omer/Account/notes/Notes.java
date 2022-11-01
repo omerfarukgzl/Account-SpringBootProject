@@ -399,31 +399,66 @@ Bir Account oluşturulmak istendiğinde var olan customer tablosundan customer i
 
 *******  Customer Service  ********
 
+Bu Methodda Servisinde id si verilen kulanıcıyı ve bu kullanıcı bilgilerini(account,transactions,name surname id) görüntüledik
+
+public CustomerDto getCustomerInformation(String customerId)
+    {
+        Customer customer= customerRepository.findById(customerId).orElseThrow(() -> new CustomerNotFoundException("Customer could not find by id: " + customerId));
+        CustomerDto customerDto = customerDtoConverter.convertToCustomerDto(customer);
+        return customerDto;
+
+    }
 
 
 
+Bu Methodda Servisinde  tüm kullanıcıları ve bu kullanıcı bilgilerini(account,transactions,name surname id) görüntüledik
+
+public List<CustomerDto> getAllCustomer()
+    {
+        List<Customer> customers=customerRepository.findAll();
+
+                List<CustomerDto> customerDtoList =  customers
+                .stream()
+                .map(customerDtoConverter::convertToCustomerDto)
+                .collect(Collectors.toList());
+
+        return customerDtoList;
+    }
+
+
+    CustomeLitsesi olduğu için tüm customer'ları customerDtoConverter nesnesi içerisindeki  convertToCustomerDto fonksiyonu ile convert işlemi yaptık.
+    Bu convert işlemini foreach lede yapabilirdik fakat stream sınıfı daha rahat.
+
+        List<CustomerDto> customerDtoList=new ArrayList<>();
+        for (Customer customer:customers) {
+
+            customerDtoList.add(customerDtoConverter.convertToCustomerDto(customer));
+        }
 
 
 
+*******  Transaction Service  ********
 
 
+ public TransactionDto createTransaction(CreateTransactionRequest createTransactionRequest)
+    {
 
 
+        Account account = accountService.getAccount(createTransactionRequest.getAccountId());
+        Transaction transaction= new Transaction(account,createTransactionRequest.getAmaount(), LocalDateTime.now());
+        //Account.getTransaction().add() demeye gerek yok çünkü transaction save edildiğinde account a da değişiklik yansıyacaktır.
+        TransactionDto transactionDto = transactionDtoConverter.convert(transactionRepository.save(transaction));
 
+        return transactionDto;
 
+    }
 
-
-
-
-
-
+    Bu serviste varolan hesaba yeni bir transaction ekleme işlemi ve eklenen transaction'u geri dönme işlemi gerçekleştirdik.
+    transaction ekleme işlemini yaparken transactionun Set tipinde olması ve foreign key olan tablo olmasını göz önünde bulundurduğumuz zaman transaction eklerken account daki transaction nesnesnine ekleme yapmadık save etmemiz iki tarafdaki değişiklik için yeterli
+    //Account.getTransaction().add() demeye gerek yok çünkü transaction save edildiğinde account a da değişiklik yansıyacaktır.
 
 
 ####################################################################################################################################################################################################################################
-
-
-
-
 
 
 
