@@ -27,14 +27,14 @@ public class Transaction {
     private LocalDateTime localDateTime;
 
 
-    @ManyToOne(fetch = FetchType.LAZY,optional = false)
+    @ManyToOne(fetch = FetchType.EAGER,optional = false)
     @JoinColumn(name="account_id", nullable=false)// foreign key
     private Account account;
 
 
     public Transaction(Account account,BigDecimal amaount,LocalDateTime localDateTime)
     {
-        this.id = null;
+        this.id = "";
         this.account=account;
         this.amaount=amaount;
         this.transactionType = TransactionType.INITIAL;

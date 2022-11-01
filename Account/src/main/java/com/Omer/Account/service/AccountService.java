@@ -17,16 +17,12 @@ import java.time.LocalDateTime;
 public class AccountService {
 
     private final AccountRepository accountRepository;
-    private final TransactionService transactionService;
     private final CustomerService customerService;
-    private final ModelMapper modelMapper;
     private final AccountDtoConverter converter;
 
-    public AccountService(AccountRepository accountRepository, TransactionService transactionService, CustomerService customerService, ModelMapper modelMapper, AccountDtoConverter converter) {
+    public AccountService(AccountRepository accountRepository, CustomerService customerService, AccountDtoConverter converter) {
         this.accountRepository = accountRepository;
-        this.transactionService = transactionService;
         this.customerService = customerService;
-        this.modelMapper = modelMapper;
         this.converter = converter;
     }
 
@@ -47,7 +43,8 @@ public class AccountService {
                     LocalDateTime.now()
                      );
 
-            account.getTransactions().add(transaction);
+
+            account.getTransactions().add(transaction);// transaction repository.save burda denemiyeceği için add yaparak account u kaydettik böylece transaction da db ye eklendi.
         }
 
         AccountDto accountDto= converter.convert(accountRepository.save(account));
@@ -55,6 +52,10 @@ public class AccountService {
 
         return accountDto;
 
+    }
+    protected Account getAccount(String accountId)
+    {
+        return accountRepository.findById(accountId).get();
     }
 
 

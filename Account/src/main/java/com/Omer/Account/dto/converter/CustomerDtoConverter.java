@@ -14,14 +14,18 @@ public class CustomerDtoConverter {
     private final CustomerAccountDtoConverter customerAccountDtoConverter;
 
     public CustomerDtoConverter(CustomerAccountDtoConverter converter) {
+
         this.customerAccountDtoConverter = converter;
     }
 
     public AccountCustomerDto convertToAccountCustomer(Optional<Customer> from) {
-        return from.map(f -> new AccountCustomerDto(f.getId(), f.getName(), f.getSurname())).orElse(null);
+        return from.map(f ->
+                new AccountCustomerDto(f.getId(),
+                        f.getName(),
+                        f.getSurname())).orElse(null);
     }
 
-    public CustomerDto convertToCustomerDto(Customer from) {
+    public  CustomerDto convertToCustomerDto(Customer from) {
         return new CustomerDto(
                 from.getId(),
                 from.getName(),

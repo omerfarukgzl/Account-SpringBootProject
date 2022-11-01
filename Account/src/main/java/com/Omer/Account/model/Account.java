@@ -31,7 +31,7 @@ public class Account {
     @JoinColumn(name = "customer_id", nullable = false)//foreign key
     private Customer customer;
 
-    @OneToMany(mappedBy = "account",fetch = FetchType.EAGER,cascade = CascadeType.ALL)// Transaction entitysindeki account değişkeni ile bağlanır
+    @OneToMany(mappedBy = "account",fetch = FetchType.EAGER,cascade = CascadeType.ALL)// Transaction entitysindeki account değişkeni ile bağlanır Eager => bu oluştuğunda transactionuda hemen oluştur
     private Set<Transaction> transactions  = new HashSet<>() ;
 
    public  Account(Customer customer, BigDecimal balance,LocalDateTime localDateTime)

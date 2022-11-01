@@ -14,6 +14,7 @@ public class CustomerAccountDtoConverter {
     private final TransactionDtoConverter transactionDtoConverter;
 
     public CustomerAccountDtoConverter(TransactionDtoConverter converter) {
+
         this.transactionDtoConverter = converter;
     }
 

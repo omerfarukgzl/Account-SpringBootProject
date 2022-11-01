@@ -38,9 +38,10 @@ public class Notes {
               OneToMany             OneToMany
 
 
+####################################################################################################################################################################################################################################
 
 
-# Customer Table
+********** Customer Table  ***********
 
      @Id
     @GeneratedValue(generator = "UUID")
@@ -67,9 +68,60 @@ public class Notes {
 
 
 
+--------------------------------------------------------------------Not-----------------------------------------------------------------------
+
+ #FetchType : Aralarında ilişki bulunan entitylerden bir tarafı yüklerken diğer tarafın yüklenme stratejisini belirlememize olanak sağlar.
+
+Hibernate içerisinde EAGER(Ön Yükleme) ve LAZY(Tembel/Sonradan Yükleme) şeklinde 2 tip entity yükleme stratejisi vardır. Bu tipleri örnekle açıklayacak olursak;
+
+Elimizde yürütülen projeleri (Proje) ve bu projelerde çalışanları(Calisan) tuttuğumuz iki entity olsun.
+ Projeler ve çalışanlar arasında bir ilişki bulunduğundan veritabanından Proje entitysini yüklediğimizde ilişkili olduğu Calisan tablosununda yüklenmesini istiyorsak fetch=FetchType.EAGER kullanırız.
+
+Proje entitysini yüklediğimizde Calisan entitysinin yüklenmesini istemiyorsak yani ihtiyaç olması halinde Calisan entitysini yüklemek istiyorsak fetch=FetchType.LAZY kullanırız.
 
 
-# Account Table
+!!! Biz projemizde account oluşturuken transaction nesnesinin account kaydedilirken transaction da kaydedilmesini istedik.
+
+
+
+
+!!!!!  @OneToOne veya @ManyToOne ========>  FetchType.EAGER
+
+       Yani ilişkili entity bir tane olduğundan ön yükleme yapmak performans açısından bir sorun oluşturmaz.
+
+
+
+       @OneToMany veya @ManyToMany ======> FetchType.LAZY
+
+       Çünkü ilişkili entityler çok sayıda olması halinde ön yükleme yapacak olursak bu durum performans kaybına neden olur.
+       Bunun için ihtiyaç olması halinde yüklemek daha doğru bir çözüm olur.
+
+
+
+!!! cascade = CascadeType.ALL
+
+Örnek vermek gerekirse Yazar ve Kitap ilişkisinde bir yazar silinirse onunla ilgili olan tüm kitaplar birlikte kaydedilir ve güncellenir.
+
+
+
+--------------------------------------------------------------------Not-----------------------------------------------------------------------
+
+
+
+
+--------------------------------------------------------------------Not-----------------------------------------------------------------------
+
+
+                                            @OneToOne veya @ManyToOne ========>  FetchType.EAGER
+
+                                            @OneToMany veya @ManyToMany ======> FetchType.LAZY
+
+
+--------------------------------------------------------------------Not-----------------------------------------------------------------------
+
+
+
+************   Account Table   **************
 
     @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL) // customer in içinde account bilgileri olucak fakat account nesnesi çağırıldığı zaman customer bilgilerini çekicek customer account çekicek ve loop select sorgu olucak bunun onune geçiyor fetchType.Lazy / cascade ise entitde yapılan herhangi bir işlemde eğer account a ait customer güncellenirse customer ds da güncelle => all crud hepsi.
     @JoinColumn(name = "customer_id", nullable = false)//foreign key
@@ -85,10 +137,15 @@ public class Notes {
        private Customer customer ==> Customer ile Account bağlantısı kuracak olan nesne
 
 
-    @OneToMany(mappedBy = "account",fetch = FetchType.LAZY)// Transaction entitysindeki account değişkeni ile bağlanır
-    private Set<Transaction> transactions;
+    @OneToMany(mappedBy = "account",fetch = FetchType.EAGER)// Transaction entitysindeki account değişkeni ile bağlanır
+    private Set<Transaction> transactions = new HashSet<>();
 
      -- aynı mantık üzerinden transaction tablosu bağlantısı gerçekleştirlildi.
+
+
+####################################################################################################################################################################################################################################
+
+
 
 
 
@@ -124,10 +181,6 @@ Service lerin interface ini oluşturma !!!
 -------------------------- Not ----------------------------
 
 
-
-
-
-
 -------------------------- Not ----------------------------
 Bir service yanlızca kendisine ait repository kullanmalı!!
 
@@ -136,6 +189,14 @@ Customer Service kullanılır . Customer Service,  Customer Repository i kullan�
 
 -------------------------- Not ----------------------------
 
+
+
+
+
+
+
+
+####################################################################################################################################################################################################################################
 
 
 # Dto'ların oluşumu
@@ -153,10 +214,99 @@ Customer Service kullanılır . Customer Service,  Customer Repository i kullan�
      örneğin account çağırımında customer bilgileride getireleceği zaman customer da account bilgilerini çekmeye çalışacak tı bunu önlemek için Ayrı Dto lar oluşturduk
      fetch örneğinin dto hali gibi düşünülebilir.
 
+####################################################################################################################################################################################################################################
 
 
 
-# Service'lerin oluşumu
+####################################################################################################################################################################################################################################
+
+
+# DtoConverter'ların oluşumu
+
+   Her Dto nun converter sınıfı oluşturulmuştur.
+
+
+
+***********   AccountDtoConverter  **************
+
+@Component
+     public AccountDto convert(Account from) {
+        return new AccountDto(from.getId(),
+                from.getBalance(),
+                from.getCreationDate(),
+                customerDtoConverter.convertToAccountCustomer(Optional.ofNullable(from.getCustomer())),
+                Objects.requireNonNull(from.getTransactions())
+                        .stream()
+                        .map(transactionDtoConverter::convert)
+                        .collect(Collectors.toSet()));
+    }
+
+
+ Method bize AccountDto dönecek.Çünkü Account nesnesi AccountDto ya dönüştürülecek.
+ Account farom parametresi aldık
+ Yeni bir AccaountDto nesnesi oluşturduk ve Account içerisindeki bilgileri from dan gelen bilgilerle eşleştirdik.
+ !fakat account içerisindeki AccountCustomerDto nesnesine gelince bu nesneye accountdan gelen customer nesnesini atayabilmek için AccountCustomerDto nesnesinide convert etmemiz gerekli
+ !Bundan dolayı bu kısımda AccountCustomerDtoConverter oluşturduk ve customer ı AccountCustomerDto ya çevirdik.
+ Daha sonra accaountdan gelen Set<Transaction>transaction nesnesi ni accountDto içerisindeki Set<TransactionDto> ya çevirmek için transactionDtoConverter sınıfını kullandık
+ !fakat bu nesne (Set<Transaction>) Set tipinde olduğu için içerisinde bulunan tüm transaction nesnelerini çevirip tekrar Set haline getirilmeli
+ !Bundan dolayı  foreach kullanmayıp stream yapısı ile yapıyoruz.
+ Objects.requireNonNull(from.getTransactions())
+ .stream()
+ .map(transactionDtoConverter::convert)
+  .collect(Collectors.toSet())            ====> Set içerisindeki tüm transaction nesnelerini convert edip tekrar Set ledik
+
+
+
+***********   CustomertDtoConverter  **************
+
+    public AccountCustomerDto convertToAccountCustomer(Optional<Customer> from) {
+        return from.map(f ->
+                new AccountCustomerDto(f.getId(),
+                        f.getName(),
+                        f.getSurname())).orElse(null);
+    }
+
+    Bu Method AccountDtoConverter içerisindeki AccountCustomerDto için yazıldı ve yanlızda id ad soyad bilgisi döndürüyor
+
+
+
+
+    public  CustomerDto convertToCustomerDto(Customer from) {
+        return new CustomerDto(
+                from.getId(),
+                from.getName(),
+                from.getSurname(),
+                from.getAccounts()
+                        .stream()
+                        .map(customerAccountDtoConverter::convert)
+                        .collect(Collectors.toSet()));
+
+
+       Bu method ise Customer bilgisi çağırıldığında customer bilgileri hesap bilgileri ve işlem bilgilerini çevirmek için yazıldı.
+
+
+
+
+
+
+
+
+
+!!!!!!  Diğer Converter larda aynı mantıkla oluşturuldu.
+
+
+####################################################################################################################################################################################################################################
+
+
+
+
+
+####################################################################################################################################################################################################################################
+
+**********    Service'lerin oluşumu   ***********
+
+
+
 Proje bizden customer eklememizi istemiyor. Var olan customer'lara account eklememizi istiyor.
 Bu nedenle cutomer service bize customer bilgilerini getirmeli fakat dışarıya değil Account Service kullanımı için getirmeli.(protected yanlızca paket içerisinden erişimi)
 Account Service yeni bir account eklemek istediğinde customer bilgilerini de kullanmak zorunda.Çünkü Account ve Customer ilişkisinde oneToMany-ManyToOne Customer sız account olamaz.
@@ -188,10 +338,66 @@ Account service den customer repository i kullanıp bilgi alabilirdik fakat bu y
 
 
 
-- Account Service
+*******  Account Service  ********
 
 Bir Account oluşturulmak istendiğinde var olan customer tablosundan customer id si gelecek.
 
+ public AccountDto createAccount(CreateAccountRequest createAccountRequest)
+    {
+
+        Customer customer = customerService.findCustomerById(createAccountRequest.getCustomerId());
+
+        Account account = new Account(customer,createAccountRequest.getInitialCredit(),LocalDateTime.now());
+
+        if(createAccountRequest.getInitialCredit().compareTo(BigDecimal.ZERO)>0)
+        {
+            //Transaction transaction = transactionService.createTransaction(account,createAccountRequest.getInitialCredit());
+
+            Transaction transaction = new Transaction(account,
+                    createAccountRequest.getInitialCredit(),
+                    LocalDateTime.now()
+                     );
+
+            account.getTransactions().add(transaction);//      !!!! @@@@@@@   transaction repository.save burda denemiyeceği için add yaparak account u kaydettik böylece transaction da db ye eklendi.
+        }
+
+        AccountDto accountDto= converter.convert(accountRepository.save(account));
+
+
+        return accountDto;
+
+    }
+
+
+    Customer customer = customerService.findCustomerById(createAccountRequest.getCustomerId());
+    -- Öncelikle her account bir hesaba bağlı olacağı için apiden parametre olarak gönderilen customer id ve inital credit json bilgilerinden
+       customerid bilgisi ile o id ye sahip olan customer bulduk
+
+    Account account = new Account(customer,createAccountRequest.getInitialCredit(),LocalDateTime.now());
+     -- Daha sonra o müşteriye ait yeni bir account oluşturmak istediğimiz için account entity deki customer nesnesine bulduğumuz customer ı ve apiden gelen initalcredit bilgisini göndererk yeni bir account oluşturduk.
+
+
+   if(createAccountRequest.getInitialCredit().compareTo(BigDecimal.ZERO)>0)
+   {
+            //Transaction transaction = transactionService.createTransaction(account,createAccountRequest.getInitialCredit());
+
+            Transaction transaction = new Transaction(account,createAccountRequest.getInitialCredit(),LocalDateTime.now());
+            account.getTransactions().add(transaction);
+   }
+
+   -- Daha sonra apiden gelen initialCredit bilgisi 0 dan büyükse bir transaction işlemi oluşturmamız gerektiği için
+     gerekkli kontrolü yaptıktan sonra transaction'u transactionService den bağlanıp transactionRepositoryde oluşturmadık.
+     Çünkü transaction oluştuktan sonra veritabanına kaydedemeyiz. Bunun sebebi transaction bir Accounta ihtiyaç duyar bundan dolayı
+     burada transaction nesnesini oluşturup daha sonra account nesnesindeki Set veri yapısı tipinde saklanan transaction nesnesine ekledik // Transaction transaction = new Transaction(account,createAccountRequest.getInitialCredit(),LocalDateTime.now());
+     transaction repository.save burda denemiyeceği için add yaparak account u kaydettik böylece transaction da db ye eklendi.
+
+     AccountDto accountDto= converter.convert(accountRepository.save(account));
+     -- Daha  sonra account nesnesini kaydettiğimiz için Set<>transaction veri yapısıda veritabanına kaydolmuş oldu.
+
+
+
+
+*******  Customer Service  ********
 
 
 
@@ -202,6 +408,18 @@ Bir Account oluşturulmak istendiğinde var olan customer tablosundan customer i
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+####################################################################################################################################################################################################################################
 
 
 
