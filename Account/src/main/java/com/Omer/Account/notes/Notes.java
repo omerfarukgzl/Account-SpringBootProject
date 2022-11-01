@@ -528,12 +528,76 @@ Destination otomatik atadı
 setup Methodu seçtik
 Ok
 
+   Before Methodu: Her test senaryosu çalıştırılmadan önce çalıştırılan method
+    İçerisinde genelde her senaryoda ortak kullanılanlar yazılır
+    Ve Hangi senaryo test edilecekse onun objesi oluşturulur. Ki test sınıfı içerisinde kullabılabilsin.
+
+
 
     AccountServiceTest classının test edeceğimiz  AccountService classıyla bağlantısı yok. Dolayısıyla öncellikle bağlantı kurulur.
     Test etmek istediğimiz Classın objesi oluşturulur:
      private AccountService accountService
 
-     Daha sonra test edilecek sınıfın kullanmaıs gereken objelerde buraya eklenir.(private final yapılmasının sebebi aslında budur. Test sınıfında ihtiyacımız olan bu nesneleri service(accountService) objesine ınject edebilelim.)
+     Daha sonra test edilecek sınıfın kullanması gereken objeler de buraya eklenir.(private final yapılmasının sebebi aslında budur. Test sınıfında ihtiyacımız olan bu nesneleri service(accountService) objesine ınject edebilelim.)
+
+    Before içerisinde accountService objesi oluşturulduğu (new) zaman içerisine(consturctor) parametre istediği nesneleri göndermem gerekli.
+    örneğin CustomerService nesnesi parametresi alması gerekli. Biz bu nesneyide before içeriisnde new lersek (oluşturusak) bu nesnede parametreler alması gerekecek.Böyle böyle uzar gider.
+    Bundan dolayı JUnit bize kolaylık sağlıyor.
+ !! Mockito kütüphanesi kullanarak yalancı servis oluşturabilmemizi sağlıyor   ===> accountRepository = Mockito.mock(AccountRepository.class);
+    Mocklama işlemiyle birlikte accountRepository classının tüm özellikleri davranışları kontrolü testin eline geçebildi.
+
+    Ve daha sonra oluşturduğumuz mock nesnelerini test edeceğimiz class nesnesinin parametrelerine atadık(cunstructor)
+    accountService = new AccountService(accountRepository,customerService,converter);
+    artık accountService in her metodu çağırılabilir.
+
+    Artık Test senaryolarını yazabliriz. Bunun için Test Annatation u eklenir.(junit)
+    Kurallar:
+    * test senaryosu methodu public olmalı
+    * test senaryosu methodu void olmalı. Geri birşey dönmemeli
+    * test senaryolarının genel yazım kurallarına dikkat edilmeli
+      :method adı when ile başlar
+
+
+
+      ## İlk test methodu yazımı
+
+      whenCreateAccountCalledWithValidRequest_itShouldReturnValidAccountDto()
+      createAccount Geçerli istekle çağırıldığında geçerli accountDto dönmeli senaryosu  / Fonksiyonun kendisinin testi ( parametre olarak geçerli bir istek parametresi alır ve geriye accountDto döner)
+       Geçerli istek parametresi olarak CreateAccountRequest alır.Bu nedenle bu parametre nesnesi oluşturulur.
+       Bu geçerli request sonucu testiydi şimdi mockların test edilmesi gerek
+
+
+        Customer customer = customerService.findCustomerById(createAccountRequest.getCustomerId());
+
+       İlk Mockumuz bize custom nesnesi dönen bir methodu geçerli bir parametre göndererek çağırılması.
+       geri dönen bir customer olduğu için test edilebilirlik açısından bir customer nesnesi oluşturmalıyız. Yoksa testi deneyecek bir customer nesnemiz olmaz.
+                 Customer customer = Customer.builder()
+                .id("12345")
+                .name("Omer")
+                .surname("Faruk")
+                .build();
+
+                ==>findCustomerById(createAccountRequest.getCustomerId() buradaki getCustomerId() gönderip test edebilmek için customer oluşturdukj
+
+
+       Daha sonra Mock olarak oluşturulan servisin davranışını belirtmemiz gerekli.
+       => Mockito.when(customerService.findCustomerById("12345")).thenReturn(customer);
+         : customerService.findCustomerById "12345" parametresiyle çağırıldığı zaman ( request nesnesi oluşturduğumuz createAccountRequest in customerId si) customer nesnesini dön
+           :Böylece Junit aşağıdaki satıra geldiği zaman Mockito ile yalancı servisi çağırıp davranışını belirliyor. Davranışı: getcustomerById her "12345" ile çağırıldığında her zaman customer dönecek.
+            Customer customer = customerService.findCustomerById(createAccountRequest.getCustomerId());
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
