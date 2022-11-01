@@ -1,9 +1,7 @@
 package com.Omer.Account.model;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -12,7 +10,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Transaction")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 public class Transaction {
 
@@ -28,16 +27,17 @@ public class Transaction {
     private LocalDateTime localDateTime;
 
 
-    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY,optional = false)
     @JoinColumn(name="account_id", nullable=false)// foreign key
     private Account account;
 
 
     public Transaction(Account account,BigDecimal amaount,LocalDateTime localDateTime)
     {
+        this.id = null;
         this.account=account;
         this.amaount=amaount;
-        this.account=account;
+        this.transactionType = TransactionType.INITIAL;
         this.localDateTime=localDateTime;
 
     }

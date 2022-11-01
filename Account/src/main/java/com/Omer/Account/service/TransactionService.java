@@ -19,7 +19,7 @@ public class TransactionService {
 
     protected Transaction createTransaction(final Account account, BigDecimal amaount)
     {
-        Transaction transaction= transactionRepository.save(new Transaction(account,amaount, LocalDateTime.now()));
+        Transaction transaction= new Transaction(account,amaount, LocalDateTime.now());
 
         return  transaction;
     }

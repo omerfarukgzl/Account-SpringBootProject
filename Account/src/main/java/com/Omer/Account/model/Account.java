@@ -1,20 +1,20 @@
 package com.Omer.Account.model;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.GenericGenerators;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "Account")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 public class Account {
     @Id
@@ -31,13 +31,15 @@ public class Account {
     @JoinColumn(name = "customer_id", nullable = false)//foreign key
     private Customer customer;
 
-    @OneToMany(mappedBy = "account",fetch = FetchType.LAZY)// Transaction entitysindeki account değişkeni ile bağlanır
-    private Set<Transaction> transactions;
+    @OneToMany(mappedBy = "account",fetch = FetchType.EAGER,cascade = CascadeType.ALL)// Transaction entitysindeki account değişkeni ile bağlanır
+    private Set<Transaction> transactions  = new HashSet<>() ;
 
    public  Account(Customer customer, BigDecimal balance,LocalDateTime localDateTime)
     {
-        this.customer=customer;
+        this.id="";
         this.customer=customer;
         this.balance=balance;
+        this.creationDate=localDateTime;
+
     }
 }

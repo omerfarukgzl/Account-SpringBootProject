@@ -2,6 +2,7 @@ package com.Omer.Account.service;
 
 import com.Omer.Account.dto.AccountDto;
 import com.Omer.Account.dto.CreateAccountRequest;
+import com.Omer.Account.dto.converter.AccountDtoConverter;
 import com.Omer.Account.model.Account;
 import com.Omer.Account.model.Customer;
 import com.Omer.Account.model.Transaction;
@@ -19,12 +20,14 @@ public class AccountService {
     private final TransactionService transactionService;
     private final CustomerService customerService;
     private final ModelMapper modelMapper;
+    private final AccountDtoConverter converter;
 
-    public AccountService(AccountRepository accountRepository, TransactionService transactionService, CustomerService customerService, ModelMapper modelMapper) {
+    public AccountService(AccountRepository accountRepository, TransactionService transactionService, CustomerService customerService, ModelMapper modelMapper, AccountDtoConverter converter) {
         this.accountRepository = accountRepository;
         this.transactionService = transactionService;
         this.customerService = customerService;
         this.modelMapper = modelMapper;
+        this.converter = converter;
     }
 
 
@@ -33,15 +36,22 @@ public class AccountService {
 
         Customer customer = customerService.findCustomerById(createAccountRequest.getCustomerId());
 
-        Account account = new Account(customer,createAccountRequest.getInitalCredit(),LocalDateTime.now());
+        Account account = new Account(customer,createAccountRequest.getInitialCredit(),LocalDateTime.now());
 
-        if(createAccountRequest.getInitalCredit().compareTo(BigDecimal.ZERO)>0)
+        if(createAccountRequest.getInitialCredit().compareTo(BigDecimal.ZERO)>0)
         {
-            Transaction transaction = transactionService.createTransaction(account,createAccountRequest.getInitalCredit());
+            //Transaction transaction = transactionService.createTransaction(account,createAccountRequest.getInitialCredit());
+
+            Transaction transaction = new Transaction(account,
+                    createAccountRequest.getInitialCredit(),
+                    LocalDateTime.now()
+                     );
+
             account.getTransactions().add(transaction);
         }
 
-        AccountDto accountDto= modelMapper.map(accountRepository.save(account),AccountDto.class);
+        AccountDto accountDto= converter.convert(accountRepository.save(account));
+
 
         return accountDto;
 

@@ -1,11 +1,18 @@
 package com.Omer.Account.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.Omer.Account.model.TransactionType;
+import lombok.*;
 
-@Data
-@NoArgsConstructor
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class TransactionDto {
+    private String id;
+    private TransactionType transactionType=TransactionType.INITIAL;
+    private BigDecimal amaount;
+    private LocalDateTime localDateTime;
 }

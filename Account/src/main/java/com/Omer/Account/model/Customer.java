@@ -1,9 +1,7 @@
 package com.Omer.Account.model;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -11,7 +9,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "Customer")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Customer {
@@ -25,7 +24,7 @@ public class Customer {
     private String name;
     private String surname;
 
-    @OneToMany(mappedBy = "customer",fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "customer",fetch = FetchType.EAGER)
     private Set<Account> accounts;
 
 

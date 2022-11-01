@@ -1,14 +1,17 @@
 package com.Omer.Account.dto;
 
-import lombok.Data;
+import lombok.*;
 
 import java.math.BigDecimal;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class CreateAccountRequest {
 
     private String customerId;
-    private BigDecimal initalCredit;
+    private BigDecimal initialCredit;
 
 
 }
