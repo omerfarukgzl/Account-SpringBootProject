@@ -9,6 +9,7 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -18,6 +19,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode
 public class Account {
     @Id
     @GeneratedValue(generator = "UUID")
@@ -43,5 +45,29 @@ public class Account {
         this.balance=balance;
         this.creationDate=localDateTime;
 
+    }
+
+    @Override
+    public String toString() {
+        return "Account{" +
+                "id='" + id + '\'' +
+                ", balance=" + balance +
+                ", creationDate=" + creationDate +
+                ", customer=" + customer +
+                ", transactions=" + transactions +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Account account = (Account) o;
+        return Objects.equals(id, account.id) && Objects.equals(balance, account.balance) && Objects.equals(creationDate, account.creationDate) && Objects.equals(customer, account.customer) && Objects.equals(transactions, account.transactions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, balance, creationDate, customer, transactions);
     }
 }

@@ -16,12 +16,11 @@ import java.util.stream.Collectors;
 public class CustomerService {
     private final CustomerRepository customerRepository;
     private final CustomerDtoConverter customerDtoConverter;
-    private final ModelMapper modelMapper;
 
-    public CustomerService(CustomerRepository customerRepository, CustomerDtoConverter customerDtoConverter, ModelMapper modelMapper) {
+
+    public CustomerService(CustomerRepository customerRepository, CustomerDtoConverter customerDtoConverter) {
         this.customerRepository = customerRepository;
         this.customerDtoConverter = customerDtoConverter;
-        this.modelMapper = modelMapper;
     }
 
 

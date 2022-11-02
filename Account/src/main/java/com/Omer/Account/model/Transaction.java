@@ -7,6 +7,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "Transaction")
@@ -43,6 +44,5 @@ public class Transaction {
         this.localDateTime=localDateTime;
 
     }
-
 
 }
