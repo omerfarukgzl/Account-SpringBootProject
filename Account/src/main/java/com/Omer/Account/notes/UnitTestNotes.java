@@ -1,6 +1,6 @@
 package com.Omer.Account.notes;
 
-public class NotesTest {
+public class UnitTestNotes {
     /*
 ###########  Unit Test  ###########
 

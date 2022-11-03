@@ -15,6 +15,7 @@ import com.Omer.Account.repository.AccountRepository;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
@@ -60,6 +61,7 @@ public class AccountServiceTest extends TestSupport{
     @Test
     public void whenCreateAccountCalledWithValidRequestAndInitialCreditMoreThanZero_itShouldReturnValidAccountDto()//createAccount Geçerli istekle çağırıldığında geçerli accountDto dönmeli senaryosu  / Fonksiyonun kendisinin testi ( parametre olarak geçerli bir istek parametresi alır ve geriye accountDto döner)
     {
+
         CreateAccountRequest createAccountRequest = new CreateAccountRequest("customer-id", new BigDecimal(100.0));
 
         when(customerService.findCustomerById("customer-id")).thenReturn(customer);
@@ -77,17 +79,17 @@ public class AccountServiceTest extends TestSupport{
         // AccountCustomerDto accountCustomerDto = generateAccountCustomerDto(customer);
 
         TransactionDto transactionDto = new TransactionDto("transaction_id", TransactionType.INITIAL,  new BigDecimal(100.0), getLocalDateTime()); // account Dto transaction Dto ya sahip oludğu için oluşturduk
-        AccountDto accountDtoExpected = new AccountDto("account_id", new BigDecimal(100.0), getLocalDateTime(), accountCustomerDto, Set.of(transactionDto));
+        AccountDto accountDtoExpected = new AccountDto("account_id2", new BigDecimal(100.0), getLocalDateTime(), accountCustomerDto, Set.of(transactionDto));
 
+         when(accountRepository.save(ArgumentMatchers.any(Account.class))).thenReturn(account); // Gerçekten Db ye gitmediğimiz için account repository mocklamamız gerekir. Bunun anlamı account repository herhangi bir Account nesnesni classı ile çağırılırsa account dönsün
 
-         when(accountRepository.save(any(Account.class))).thenReturn(account);
-         when(converter.convert(account)).thenReturn(accountDtoExpected);
+         when(converter.convert(ArgumentMatchers.any(Account.class))).thenReturn(accountDtoExpected);
 
          AccountDto result = accountService.createAccount(createAccountRequest); // null Dönüyor hata var!!
 
-        //System.out.println(result.toString());
-        System.out.println(accountDtoExpected.toString());
-        System.out.println(result.toString());
+       /* System.out.println(account.getId()+account.toString());
+        System.out.println(accountDtoExpected.getId() +accountDtoExpected.getBalance()+accountDtoExpected.toString());
+        System.out.println(result.getId() + result.getBalance() + result.toString());*/
         assertEquals(result,accountDtoExpected);
 
 
