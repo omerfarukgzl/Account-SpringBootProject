@@ -16,14 +16,16 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -36,6 +38,10 @@ public class AccountServiceTest extends TestSupport{
     private AccountDtoConverter converter;
 
     private final   Customer customer = generateCustomer();
+
+    private final AccountCustomerDto accountCustomerDto = new AccountCustomerDto("customer-id",
+            "customer-name",
+            "customer-surname");
     //private final Customer customer = new Customer("12345", "customer-name", "customer-surname", Set.of());
 
     @BeforeEach
@@ -58,7 +64,7 @@ public class AccountServiceTest extends TestSupport{
 
         when(customerService.findCustomerById("customer-id")).thenReturn(customer);
 
-        Account account = generateAccount(customer);
+        Account account = generateAccount(customer,new BigDecimal(100.0));
 
         Transaction transaction = new Transaction(
                 "transaction_id",
@@ -70,18 +76,41 @@ public class AccountServiceTest extends TestSupport{
          account.getTransactions().add(transaction);
         // AccountCustomerDto accountCustomerDto = generateAccountCustomerDto(customer);
 
-        AccountCustomerDto accountCustomerDto = new AccountCustomerDto("customer-id",
-                "customer-name",
-                "customer-surname");
-
         TransactionDto transactionDto = new TransactionDto("transaction_id", TransactionType.INITIAL,  new BigDecimal(100.0), getLocalDateTime()); // account Dto transaction Dto ya sahip oludğu için oluşturduk
         AccountDto accountDtoExpected = new AccountDto("account_id", new BigDecimal(100.0), getLocalDateTime(), accountCustomerDto, Set.of(transactionDto));
 
 
          when(accountRepository.save(any(Account.class))).thenReturn(account);
          when(converter.convert(account)).thenReturn(accountDtoExpected);
-        System.out.println(account.toString());
+
          AccountDto result = accountService.createAccount(createAccountRequest); // null Dönüyor hata var!!
+
+        //System.out.println(result.toString());
+        System.out.println(accountDtoExpected.toString());
+        System.out.println(result.toString());
+        assertEquals(result,accountDtoExpected);
+
+
+    }
+
+
+    // hem geçerli bir request param gelmesi hemde ınitial credit = 0 olması senaryosu (içerideki if e girmeme durumu)
+    @Test()
+    public void whenCreateAccountCalledWithValidRequestAndInitialCreditIsZero_itShouldReturnValidAccountDto() throws Exception//
+    {
+        CreateAccountRequest createAccountRequest = new CreateAccountRequest("customer-id", new BigDecimal(100.0));
+
+        when(customerService.findCustomerById("customer-id")).thenReturn(customer);
+
+        Account account = generateAccount(customer,new BigDecimal(0.0));
+
+        AccountDto accountDtoExpected = new AccountDto("account_id2", new BigDecimal(0.0), getLocalDateTime(), accountCustomerDto,Set.of());
+
+        when(accountRepository.save(any(Account.class))).thenReturn(account);
+
+        when(converter.convert(account)).thenReturn(accountDtoExpected);
+
+        AccountDto result = accountService.createAccount(createAccountRequest); // null Dönüyor hata var!!
 
         //System.out.println(result.toString());
         System.out.println(accountDtoExpected.toString());
@@ -91,5 +120,26 @@ public class AccountServiceTest extends TestSupport{
 
 
     }
+
+
+    @Test
+    public void whenCreateAccountCalledWithValidRequest_but_CustomerIdDoesNotExist_shouldThrowCustomerNotFoundException()
+    {
+        CreateAccountRequest createAccountRequest = new CreateAccountRequest("customer-id", new BigDecimal(100.0));
+
+        when(customerService.findCustomerById("customer-id")).thenThrow(new CustomerNotFoundException("test-exception customer not found"));
+
+        assertThrows(CustomerNotFoundException.class,
+                () -> accountService.createAccount(createAccountRequest));
+
+        verify(customerService).findCustomerById(createAccountRequest.getCustomerId());
+        verifyNoInteractions(accountRepository);
+        verifyNoInteractions(converter);
+
+
+    }
+
+
+
 
 }

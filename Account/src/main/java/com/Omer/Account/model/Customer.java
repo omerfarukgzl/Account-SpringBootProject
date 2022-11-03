@@ -15,7 +15,6 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode
 public class Customer {
     @Id
     @GeneratedValue(generator = "UUID")
@@ -29,6 +28,4 @@ public class Customer {
 
     @OneToMany(mappedBy = "customer",fetch = FetchType.EAGER)
     private Set<Account> accounts;
-
-
 }

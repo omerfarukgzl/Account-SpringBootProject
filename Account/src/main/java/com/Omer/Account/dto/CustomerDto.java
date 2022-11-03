@@ -10,12 +10,10 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@EqualsAndHashCode
 public class CustomerDto {
     private String id;
     private String name;
     private String surname;
     private Set<CustomerAccountDto> accounts;
-
 
 }

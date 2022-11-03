@@ -46,8 +46,8 @@ public class TestSupport {
                 ).collect(Collectors.toList());
     }
 
-    public Account generateAccount(Customer customer) {
-        return new Account("account_id",new BigDecimal(100.0), getLocalDateTime(), customer, new HashSet<>());
+    public Account generateAccount(Customer customer,BigDecimal balance) {
+        return new Account("account_id",balance, getLocalDateTime(), customer, new HashSet<>());
     }
     public AccountCustomerDto generateAccountCustomerDto(Customer customer) {
 

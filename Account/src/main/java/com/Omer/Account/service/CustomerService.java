@@ -42,9 +42,6 @@ public class CustomerService {
     public List<CustomerDto> getAllCustomer()
     {
         List<Customer> customers=customerRepository.findAll();
-
-
-
         //foreach ile List converter
     /*
         List<CustomerDto> customerDtoList=new ArrayList<>();

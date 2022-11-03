@@ -9,6 +9,7 @@ import com.Omer.Account.service.TransactionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.math.BigDecimal;
 
 @RestController
@@ -22,7 +23,7 @@ public class TransactionController {
         this.transactionService = transactionService;
     }
     @PostMapping
-    public ResponseEntity<TransactionDto> CreateTransaction(@RequestBody CreateTransactionRequest createTransactionRequest)
+    public ResponseEntity<TransactionDto> CreateTransaction(@Valid @RequestBody CreateTransactionRequest createTransactionRequest)
     {
        TransactionDto transactionDto=transactionService.createTransaction(createTransactionRequest);
 

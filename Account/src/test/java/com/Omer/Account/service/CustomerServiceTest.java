@@ -78,4 +78,14 @@ public class CustomerServiceTest extends TestSupport {
 
     }
 
+    @Test
+    public void whenGetAllCustomerCalledWithCustomerIdCustomerDoesNotExist_itShouldReturnExceptionCustomerNotFound(){
+
+        when(customerRepository.findAll()).thenThrow(new CustomerNotFoundException("test-exception customer not found"));
+
+        assertThrows(CustomerNotFoundException.class,
+                () -> customerService.getAllCustomer());
+
+    }
+
 }

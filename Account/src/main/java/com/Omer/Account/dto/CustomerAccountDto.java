@@ -11,7 +11,6 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
 public class CustomerAccountDto {
     private String id;
     private BigDecimal balance;
