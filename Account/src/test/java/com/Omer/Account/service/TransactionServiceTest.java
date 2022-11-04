@@ -33,30 +33,15 @@ class TransactionServiceTest extends TestSupport {
         transactionDtoConverter= mock(TransactionDtoConverter.class);
         accountService =mock(AccountService.class);
 
-        transactionService= new TransactionService(transactionRepository,transactionDtoConverter,accountService);
+        transactionService= new TransactionService(transactionRepository,transactionDtoConverter);
     }
 
 
     @Test
     public void whenCreateTransactionCalledWithCreateTransactionRequest_itShouldReturnValidTransactionDto()
     {
-        CreateTransactionRequest createTransactionRequest= new CreateTransactionRequest("account-id",new BigDecimal(100.0));
 
-        Customer customer = generateCustomer();
-        Account account = new Account("account-id",new BigDecimal(100.0),getLocalDateTime(),customer,new HashSet<>());
-         when(accountService.getAccount("account-id")).thenReturn(account);
-
-        Transaction transaction = new Transaction("transaction-id", TransactionType.INITIAL,new BigDecimal(100.0),getLocalDateTime(),account);
-
-        TransactionDto transactionDto = new TransactionDto("transaction-id",TransactionType.INITIAL,new BigDecimal(100.0),getLocalDateTime());
-
-        when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
-        when(transactionDtoConverter.convert(transaction)).thenReturn(transactionDto);
-
-        TransactionDto result = transactionService.createTransaction(createTransactionRequest);
-
-        assertEquals(result,transactionDto);
-
+        /*protected metodların testi olurmu ? gerek varmı ?*/
 
     }
 

@@ -42,7 +42,7 @@ public class CustomerControllerTest extends IntegrationTestSupport {
         Customer customer = customerRepository.save(generateCustomer());
         accountService.createAccount(generateCreateAccountRequest(customer.getId(), 100));
 
-        CustomerDto expectedCustomerDto = converter.convertToCustomerDto(
+        CustomerDto expectedCustomerDto = customerDtoConverter.convertToCustomerDto(
                 customerRepository.findById(
                         Objects.requireNonNull(customer.getId())).get());
 
@@ -72,7 +72,7 @@ public class CustomerControllerTest extends IntegrationTestSupport {
 
         List<CustomerDto> customerDtoList =
                 customers.stream()
-                .map(converter::convertToCustomerDto)
+                .map(customerDtoConverter::convertToCustomerDto)
                 .collect(Collectors.toList());
 
         this.mockMvc.perform(get(CUSTOMER_ALL_API_ENDPOINT))

@@ -24,6 +24,8 @@ public class TestSupport {
     public static final String CUSTOMER_ALL_API_ENDPOINT = "/v1/customer/getAll";
     public static final String ACCOUNT_API_ENDPOINT = "/v1/account";
 
+    public static final String TRANSACTION_API_ENDPOINT = "/v1/trs/";
+
     public Instant getCurrentInstant() {
         String instantExpected = "2021-06-15T10:15:30Z";
         Clock clock = Clock.fixed(Instant.parse(instantExpected), Clock.systemDefaultZone().getZone());
@@ -38,6 +40,10 @@ public class TestSupport {
 
     public Customer generateCustomer() {
         return new Customer("customer-id", "customer-name", "customer-surname", Set.of());
+    }
+    public Transaction generateTransaction(Account account,BigDecimal InitialCredit) {
+
+        return new Transaction(account,InitialCredit,getLocalDateTime());
     }
     public CustomerDto generateCustomerDto(Customer customer) {
         return new CustomerDto(customer.getId(), customer.getName(), customer.getSurname(), Set.of());

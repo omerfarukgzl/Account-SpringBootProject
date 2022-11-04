@@ -1,10 +1,7 @@
 package com.Omer.Account.service;
 
 import com.Omer.Account.TestSupport;
-import com.Omer.Account.dto.AccountCustomerDto;
-import com.Omer.Account.dto.AccountDto;
-import com.Omer.Account.dto.CreateAccountRequest;
-import com.Omer.Account.dto.TransactionDto;
+import com.Omer.Account.dto.*;
 import com.Omer.Account.dto.converter.AccountDtoConverter;
 import com.Omer.Account.exception.CustomerNotFoundException;
 import com.Omer.Account.model.Account;
@@ -12,22 +9,18 @@ import com.Omer.Account.model.Customer;
 import com.Omer.Account.model.Transaction;
 import com.Omer.Account.model.TransactionType;
 import com.Omer.Account.repository.AccountRepository;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.math.BigDecimal;
-import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class AccountServiceTest extends TestSupport{
@@ -37,6 +30,7 @@ public class AccountServiceTest extends TestSupport{
     private AccountRepository accountRepository;
     private  CustomerService customerService;
     private AccountDtoConverter converter;
+    private TransactionService transactionService;
 
     private final   Customer customer = generateCustomer();
 
@@ -51,9 +45,10 @@ public class AccountServiceTest extends TestSupport{
         accountRepository = Mockito.mock(AccountRepository.class);
         customerService = Mockito.mock(CustomerService.class);
         converter = Mockito.mock(AccountDtoConverter.class);
+        transactionService=Mockito.mock(TransactionService.class);
 
 
-        accountService = new AccountService(accountRepository,customerService,converter);
+        accountService = new AccountService(accountRepository,customerService,converter, transactionService);
 
     }
 
@@ -81,11 +76,11 @@ public class AccountServiceTest extends TestSupport{
         TransactionDto transactionDto = new TransactionDto("transaction_id", TransactionType.INITIAL,  new BigDecimal(100.0), getLocalDateTime()); // account Dto transaction Dto ya sahip oludğu için oluşturduk
         AccountDto accountDtoExpected = new AccountDto("account_id", new BigDecimal(100.0), getLocalDateTime(), accountCustomerDto, Set.of(transactionDto));
 
-         when(accountRepository.save(ArgumentMatchers.any(Account.class))).thenReturn(account); // Gerçekten Db ye gitmediğimiz için account repository mocklamamız gerekir. Bunun anlamı account repository herhangi bir Account nesnesni classı ile çağırılırsa account dönsün
+         when(accountRepository.save(any(Account.class))).thenReturn(account); // Gerçekten Db ye gitmediğimiz için account repository mocklamamız gerekir. Bunun anlamı account repository herhangi bir Account nesnesni classı ile çağırılırsa account dönsün
 
-         when(converter.convert(ArgumentMatchers.any(Account.class))).thenReturn(accountDtoExpected);
+         when(converter.convert(any(Account.class))).thenReturn(accountDtoExpected);
 
-         AccountDto result = accountService.createAccount(createAccountRequest); // null Dönüyor hata var!!
+         AccountDto result = accountService.createAccount(createAccountRequest); //
 
        /* System.out.println(account.getId()+account.toString());
         System.out.println(accountDtoExpected.getId() +accountDtoExpected.getBalance()+accountDtoExpected.toString());
@@ -139,6 +134,35 @@ public class AccountServiceTest extends TestSupport{
         verifyNoInteractions(converter);
 
 
+    }
+
+    @Test
+    public void whenCalledCreateTransactionAndGetAccountWithCreateTransactionRequest_itShouldReturnValidAccountDto() throws Exception
+    {
+
+        Account account = generateAccount(customer,new BigDecimal(100.0));
+        CreateTransactionRequest createTransactionRequest = new CreateTransactionRequest(account.getId(),new BigDecimal(200));
+
+        Transaction transaction = new Transaction(
+                "transaction_id",
+                TransactionType.INITIAL,
+                createTransactionRequest.getAmaount(),
+                LocalDateTime.now(),
+                account);
+        TransactionDto transactionDto = new TransactionDto("transaction_id", TransactionType.INITIAL,  new BigDecimal(100.0), getLocalDateTime()); // account Dto transaction Dto ya sahip oludğu için oluşturduk
+        AccountDto accountDtoExpected = new AccountDto("account_id", new BigDecimal(100.0), getLocalDateTime(), accountCustomerDto, Set.of(transactionDto));
+
+        when(accountRepository.findById(createTransactionRequest.getAccountId())).thenReturn(Optional.of(account));
+        when(transactionService.createTransaction(account,createTransactionRequest.getAmaount())).thenReturn(transaction);
+
+
+        account.getTransactions().add(transaction);
+        when(accountRepository.save(any(Account.class))).thenReturn(account);
+        when(converter.convert((account))).thenReturn(accountDtoExpected);
+
+        AccountDto result = accountService.createTransactionAndGetAccount(createTransactionRequest);
+
+        assertEquals(result,accountDtoExpected);
     }
 
 

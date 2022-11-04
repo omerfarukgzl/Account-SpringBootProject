@@ -158,7 +158,8 @@ Hata java 8 den sonra LocalDateTime Veri tipini desteklemediğini bunu için bir
 
 
    Öncelikle customer bilgilerini getireceğimiz için db de customer account ve transaction bilgilerinin olması gerek. Dolayısıyla Öncleikle bu verileri oluşturuyoruz
-   (Customer ve Account )
+   (Customer ve Account ) account oluşturmak için customer a ihtiyaç var eğer customer oluşturmasaydık validasyon sağlanırsa main metounda customer oluşacaktı
+   fakat account eklenmiş halini test etmek istediğimiz için ve customerDto için customer nesnesine ihyiyacımız olduğu için  customer biz oluşturup db ye kaydediyoruz
    ( Account oluşumu transaction oluşumunu tetikliyor) ==> accountService.createAccount Metodu.
 
    Daha sonra Controller içerisindeki test ettiğimi api nin akışına göre senaryoyu başlatıyoruz.

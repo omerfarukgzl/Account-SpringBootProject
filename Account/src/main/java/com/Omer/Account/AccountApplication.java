@@ -25,9 +25,10 @@ public class AccountApplication implements CommandLineRunner {
 
 
 	@Override
-	public void run(String... args) throws Exception
+	public void run(String... args) throws Exception // program ayağı kalkareken çalışacak olan metod
 	{
 		Customer customer= customerRepository.save(new Customer("","Omer","Faruk",new HashSet<>()));
+		//Customer customer2= customerRepository.save(new Customer("","Taha","Yasin",new HashSet<>())); // ikinci bir customer oluşturmak istenir ve öyle bir senaryo da düşünülürse
 
 		System.out.println(customer.getId());
 	}
