@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @RestController
@@ -22,7 +24,7 @@ public class CustomerController {
     }
 
     @GetMapping("{customerId}")
-    public ResponseEntity<CustomerDto> getCustomerInformation(@PathVariable String customerId)
+    public ResponseEntity<CustomerDto> getCustomerInformation(@Valid @PathVariable @NotBlank String customerId)
     {
         CustomerDto customerDto = customerService.getCustomerInformation(customerId);
 
@@ -30,7 +32,7 @@ public class CustomerController {
     }
 
 
-    @GetMapping
+    @GetMapping("getAll")
     public ResponseEntity<List<CustomerDto>> getAllCustomers() {
         return ResponseEntity.ok(customerService.getAllCustomer());
     }

@@ -1,121 +1,99 @@
 package com.Omer.Account.controller;
 
+import com.Omer.Account.IntegrationTestSupport;
 import com.Omer.Account.TestSupport;
-import com.Omer.Account.dto.AccountDto;
-import com.Omer.Account.dto.CreateAccountRequest;
-import com.Omer.Account.dto.converter.AccountDtoConverter;
-import com.Omer.Account.model.Account;
-import com.Omer.Account.model.Customer;
-import com.Omer.Account.repository.AccountRepository;
-import com.Omer.Account.repository.CustomerRepository;
-import com.Omer.Account.service.AccountService;
-import com.Omer.Account.service.CustomerService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.hamcrest.Matchers;
-import org.json.JSONString;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.extension.ExtendWith;
+import com.Omer.Account.dto.CreateAccountRequest;
+import com.Omer.Account.model.Customer;
+
+import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.web.bind.annotation.RestController;
+
 
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Supplier;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-@ActiveProfiles("test")
-@AutoConfigureMockMvc
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
-        "server-port=0",
-        "command.line.runner.enabled=false"
-})
 @RunWith(SpringRunner.class)
-@DirtiesContext
-public class AccountControllerTest extends TestSupport {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockBean
-    private Supplier<UUID> uuidSupplier;
-
-    @Autowired
-    private AccountRepository accountRepository;//account controller da account service. create kullaıldığı için accoun service 'in ihtiyacı olan nesneleeri oluşturuyoruz.
-
-
-    @Autowired
-    private CustomerService customerService;
-    @Autowired
-    private CustomerRepository customerRepository;
-
-    @Autowired
-    private AccountDtoConverter accountDtoConverter;
-
-    private AccountService accountService=new AccountService(accountRepository,customerService,accountDtoConverter);
-
-    private static final UUID uuId=UUID.randomUUID();//db lerde uuıd olan id lerimizi test etmek için yazdık
-
-    @BeforeEach
-    public void Setup()
-    {
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.configure(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS,false);
-
-
-
-    }
-
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+public class AccountControllerTest extends IntegrationTestSupport {
 
 
     @Test
     public void testCreateAccount_whenCustomerIdExist_ItShouldCreateAccountAndReturnAccountDto () throws Exception {
-        Customer customer = customerRepository.save(new Customer("", "Omer", "Faruk", new HashSet<>()));
+        Customer customer = customerRepository.save(generateCustomer());
         CreateAccountRequest createAccountRequest = new CreateAccountRequest(customer.getId(), new BigDecimal(100.0));
 
         this.mockMvc.perform(post(ACCOUNT_API_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writer().withDefaultPrettyPrinter().writeValueAsString(createAccountRequest)))
-                        .andExpect(status().is2xxSuccessful())
-                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                        .andExpect(jsonPath("$.id", notNullValue()))
-                        .andExpect(jsonPath("$.balance", is(100)))
-                        .andExpect(jsonPath("$.customer.id", is(customer.getId())))
-                        .andExpect(jsonPath("$.customer.name", is(customer.getName())))
-                        .andExpect(jsonPath("$.customer.surname", is(customer.getSurname())))
-                        ;
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id", notNullValue()))// veritabnına kayıtlı olan id yi getirecektir .
+                .andExpect(jsonPath("$.balance", is(100)))//AccountDto içerisindeki  balance verilerini getir
+                .andExpect(jsonPath("$.customer.id", is(customer.getId())))//AccountDto içerisindeki customer içerisindeki customer id verisini getir
+                .andExpect(jsonPath("$.customer.name", is(customer.getName())))//AccountDto içerisindeki customer içerisindeki customer name getir
+                .andExpect(jsonPath("$.customer.surname", is(customer.getSurname()))) //AccountDto içerisindeki customer içerisindeki customer surname getir
+                .andExpect(jsonPath("$.transactionDtos", hasSize(1))) // AccountDto içerisindeki transactionDtos verileri getir
+                .andDo(print()) // dönen sonucu ekranda göster
+                ;
+    }
+    @Test
+    public void testCreateAccount_whenCustomerIdDoesNotExit_shouldReturn404NotFound() throws Exception {
+        CreateAccountRequest createAccountRequest = new CreateAccountRequest("id", new BigDecimal(100.0));
+
+        this.mockMvc.perform(post(ACCOUNT_API_ENDPOINT)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writer().withDefaultPrettyPrinter().writeValueAsString(createAccountRequest)))
+                .andExpect(status().isNotFound())
+                .andDo(print()); // dönen sonucu ekranda göster;
+
+    }
+
+    @Test
+    public void testCreateAccount_whenCustomerIsNotValid_shouldReturn404NotFound() throws Exception {
+        CreateAccountRequest createAccountRequest = new CreateAccountRequest("isNotValidId", new BigDecimal(100.0));
+
+        this.mockMvc.perform(post(ACCOUNT_API_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writer().withDefaultPrettyPrinter().writeValueAsString(createAccountRequest)))
+                .andExpect(status().isBadRequest())
+                .andDo(print()); // dönen sonucu ekranda göster;
+
+    }
+
+    @Test
+    public void testCreateAccount_whenCustomerIdExist_ButInitialCreditLessThanZero_ItShouldReturn400BadRequest () throws Exception {
+
+        CreateAccountRequest createAccountRequest = new CreateAccountRequest("id", new BigDecimal(-100));
+
+        this.mockMvc.perform(post(ACCOUNT_API_ENDPOINT)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writer().withDefaultPrettyPrinter().writeValueAsString(createAccountRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andDo(print()); // dönen sonucu ekranda göster;
+
+
 
 
     }
+
+
+
 }
 

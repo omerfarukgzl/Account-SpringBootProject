@@ -79,7 +79,7 @@ public class AccountServiceTest extends TestSupport{
         // AccountCustomerDto accountCustomerDto = generateAccountCustomerDto(customer);
 
         TransactionDto transactionDto = new TransactionDto("transaction_id", TransactionType.INITIAL,  new BigDecimal(100.0), getLocalDateTime()); // account Dto transaction Dto ya sahip oludğu için oluşturduk
-        AccountDto accountDtoExpected = new AccountDto("account_id2", new BigDecimal(100.0), getLocalDateTime(), accountCustomerDto, Set.of(transactionDto));
+        AccountDto accountDtoExpected = new AccountDto("account_id", new BigDecimal(100.0), getLocalDateTime(), accountCustomerDto, Set.of(transactionDto));
 
          when(accountRepository.save(ArgumentMatchers.any(Account.class))).thenReturn(account); // Gerçekten Db ye gitmediğimiz için account repository mocklamamız gerekir. Bunun anlamı account repository herhangi bir Account nesnesni classı ile çağırılırsa account dönsün
 
@@ -106,7 +106,7 @@ public class AccountServiceTest extends TestSupport{
 
         Account account = generateAccount(customer,new BigDecimal(0.0));
 
-        AccountDto accountDtoExpected = new AccountDto("account_id2", new BigDecimal(0.0), getLocalDateTime(), accountCustomerDto,Set.of());
+        AccountDto accountDtoExpected = new AccountDto("account_id", new BigDecimal(0.0), getLocalDateTime(), accountCustomerDto,Set.of());
 
         when(accountRepository.save(any(Account.class))).thenReturn(account);
 

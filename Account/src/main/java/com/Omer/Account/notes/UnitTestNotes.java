@@ -101,18 +101,17 @@ Ok
         Customer customer = customerService.findCustomerById(createAccountRequest.getCustomerId());
      # İlk Mockumuz bize custom nesnesi dönen bir methodu geçerli bir parametre göndererek çağırılması.
        geri dönen bir customer olduğu için test edilebilirlik açısından bir customer nesnesi oluşturmalıyız. Yoksa testi deneyecek bir customer nesnemiz olmaz.
-                 Customer customer = Customer.builder()
-                .id("12345")
-                .name("Omer")
-                .surname("Faruk")
-                .build();
 
-                ==>findCustomerById(createAccountRequest.getCustomerId() buradaki getCustomerId() gönderip test edebilmek için customer oluşturdukj
+               return new Customer("customer-id", "customer-name", "customer-surname", Set.of());
+
+                ==>    findCustomerById("customer-id")).thenReturn(customer);
+                 buradaki getCustomerId() gönderip test edebilmek için customer oluşturduk
 
        Daha sonra Mock olarak oluşturulan servisin davranışını belirtmemiz gerekli.
-        => Mockito.when(customerService.findCustomerById("12345")).thenReturn(customer);
-         : customerService.findCustomerById "12345" parametresiyle çağırıldığı zaman ( request nesnesi oluşturduğumuz createAccountRequest in customerId si) customer nesnesini dön
-         :Böylece Junit aşağıdaki satıra geldiği zaman Mockito ile yalancı servisi çağırıp davranışını belirliyor. Davranışı: getcustomerById her "12345" ile çağırıldığında her zaman customer dönecek.
+        =>         Mockito.when(customerService.findCustomerById("customer-id")).thenReturn(customer);
+
+         : customerService.findCustomerById "customer-id" parametresiyle çağırıldığı zaman ( request nesnesi oluşturduğumuz createAccountRequest in customerId si) customer nesnesini dön
+         :Böylece Junit aşağıdaki satıra geldiği zaman Mockito ile yalancı servisi çağırıp davranışını belirliyor. Davranışı: getcustomerById her "customer-id" ile çağırıldığında her zaman customer dönecek.
          Customer customer = customerService.findCustomerById(createAccountRequest.getCustomerId());
 
 
@@ -120,14 +119,9 @@ Ok
            Account account = new Account(customer,createAccountRequest.getInitialCredit(),LocalDateTime.now());
       #  Bir Sonraki Mock olarak geriye account döndüren Account oluşturduk
         =>
-         Account account = Account.builder()
-                .id("1234")
-                .balance(new BigDecimal(100.0))
-                .creationDate(LocalDateTime.now())
-                .customer(customer)
-                .build();
-
-
+        public Account generateAccount(Customer customer,BigDecimal balance) {
+                return new Account("account_id",balance, getLocalDateTime(), customer, new HashSet<>());
+            }
 
 
 
@@ -172,10 +166,6 @@ Ok
         System.out.println(account.toString());
          AccountDto result = accountService.createAccount(createAccountRequest); // null Dönüyor hata var!!
 
-        //System.out.println(result.toString());
-        System.out.println(accountDtoExpected.toString());
-        System.out.println(account.toString());
-        System.out.println(result.toString());
         assertEquals(result,accountDtoExpected);
     }
 
@@ -212,7 +202,19 @@ Ok
 
 
 
+    public Instant getCurrentInstant() {
+        String instantExpected = "2021-06-15T10:15:30Z";
+        Clock clock = Clock.fixed(Instant.parse(instantExpected), Clock.systemDefaultZone().getZone());
 
+        return Instant.now(clock);
+    }
+
+    public LocalDateTime getLocalDateTime()
+    {
+        return LocalDateTime.ofInstant(getCurrentInstant(), Clock.systemDefaultZone().getZone());
+    }
+
+    Bu metodlar // Unit test de Local DateTime verilerini vermeyip sabit bir Date ile eşleşmeyi kontrol edebilmek için yazıldı
 
 
 

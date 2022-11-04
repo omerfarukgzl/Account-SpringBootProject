@@ -1,6 +1,10 @@
 package com.Omer.Account.dto;
 
 import com.Omer.Account.model.TransactionType;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -16,6 +20,9 @@ public class TransactionDto {
     private String id;
     private TransactionType transactionType=TransactionType.INITIAL;
     private BigDecimal amaount;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonProperty("date")
     private LocalDateTime localDateTime;
 
     @Override

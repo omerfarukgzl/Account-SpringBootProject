@@ -28,4 +28,5 @@ public class Customer {
 
     @OneToMany(mappedBy = "customer",fetch = FetchType.EAGER)
     private Set<Account> accounts;
+
 }
