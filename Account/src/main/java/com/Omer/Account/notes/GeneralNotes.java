@@ -389,6 +389,20 @@ Bir Account oluşturulmak istendiğinde var olan customer tablosundan customer i
 
 
 
+    public AccountDto createTransactionAndGetAccount(CreateTransactionRequest createTransactionRequest)
+    {
+        Account account =accountRepository.findById(createTransactionRequest.getAccountId()).get();
+
+        Transaction transaction = transactionService.createTransaction(account,createTransactionRequest.getAmaount());
+        account.getTransactions().add(transaction);
+        AccountDto accountDto= converter.convert(accountRepository.save(account));
+        return accountDto;
+    }
+
+    Transaciton ekleme işlemi Projede yoktu ben ekledim geliştirmek için!!
+
+
+
 *******  Customer Service  ********
 
 Bu Methodda Servisinde id si verilen kulanıcıyı ve bu kullanıcı bilgilerini(account,transactions,name surname id) görüntüledik
@@ -429,16 +443,11 @@ public List<CustomerDto> getAllCustomer()
 *******  Transaction Service  ********
 
 
- public TransactionDto createTransaction(CreateTransactionRequest createTransactionRequest)
+    protected Transaction createTransaction(Account account, BigDecimal amount)
     {
-
-
-        Account account = accountService.getAccount(createTransactionRequest.getAccountId());
-        Transaction transaction= new Transaction(account,createTransactionRequest.getAmaount(), LocalDateTime.now());
-        //Account.getTransaction().add() demeye gerek yok çünkü transaction save edildiğinde account a da değişiklik yansıyacaktır.
-        TransactionDto transactionDto = transactionDtoConverter.convert(transactionRepository.save(transaction));
-
-        return transactionDto;
+        Transaction transaction= new Transaction(account,amount, LocalDateTime.now());
+        transactionRepository.save(transaction);
+        return transaction;
 
     }
 

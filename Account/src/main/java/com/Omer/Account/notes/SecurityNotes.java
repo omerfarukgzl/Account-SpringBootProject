@@ -1,0 +1,75 @@
+package com.Omer.Account.notes;
+
+public class SecurityNotes {
+    /*
+
+                                    username@password               ------------->DB
+                                  ----------------------->HttpBasic
+                                  |     (encrypted)                 ------------>Inmemory
+                                  |
+      username@password           |
+     =====================>       |
+                                  |
+                                  |
+istek                       Account-Api
+                                  |
+              login               |
+       ======================>    |
+       <======================    ------------------------------                                          (authentication provider)
+               token                                          |                                                MS
+                                                              |               username@password                Google
+               GET /Header: token                                          |------>      ----------------------------->     Github
+        ======================>                                     | OAUTH2       Rest İstek                  Twitter
+        <======================                                     |        <------------------------------- FaceBook
+                 result                                                   |                   token
+                                                         Token      |            ttl:180sn genelde
+                                                                    |               time to live
+                                                                    |
+                                                                    |
+                                                                   \/
+                                                                OAUTH2 içinde bulunan Db
+                                                                    Redis
+                                                                    Db
+                                                                    Mongo Db
+                                                                    Inmemory
+                                                                    H2 olabilri neresi conf edilirse
+
+
+
+
+
+
+
+Basic:
+Uygulamaya istek atıldığında uygulama kullanıcıdan username ve password ister. password encrypted dır.
+Daha sonra username ve passwordu Basic katmanı Db ye sorgular
+Db ya gerçek db dir (pg,mysql vs) yada inmemory dir.
+inmemoryde uygulama ayağı kalkarken inmemory olarak configure edilen username ve password kaydedilir ve o kullanıcı ile girilir. Oraya yeni bir user eklenemez
+Test uygulamalarında inmemoryde tutulabilir. Büyük projelerde db kullanılabilir.
+
+
+OAUTH2:
+
+Uygulama ya username ve password vererek istek atar.
+ username ve password OUTH2 katmanından Bir uygulama ya rest isteği atarak username@password sorgular.
+ Bu uygulama Ms olabilir Google FaceBook vs olabilir.
+Daha sonra istek atılıp sorgulanan bu uygulamadan OAUTH2 ye token döner.
+OAUTH2 katmanı bu tokenı kendi içinde bulunan configure edilen db ye kaydeder.
+
+Daha sonra client yapacağı tüm isteklerde headera tokenı ekler.token Token hashlenmiş bir string yapısıdır.
+  Bu hash'in yapısını authentication provider uygulaması biliyor. Eğer OAUTH2 ye kaydedersek oda bilir.
+
+
+
+OAUTH2 tokenı nasıl kullanır:
+client uygulamaya login olur ve uygulama bize OAUTH2 ile birikte bir token döner.
+ttl suresi configure edilen saniyeye göre (örneğin 180 saniye içerisinde)
+client http isteklerinde (örneğin get olsun) header olarak token ekler
+Account-api her almış olduğu istekte bu tokenın doğruluğunu ve ttl sini kontrol eder.
+eğer valid se istek yapılır ve geriye result dönülür.
+
+
+    */
+}
+
+
