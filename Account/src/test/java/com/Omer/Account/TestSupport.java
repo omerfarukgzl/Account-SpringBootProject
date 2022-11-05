@@ -24,7 +24,7 @@ public class TestSupport {
     public static final String CUSTOMER_ALL_API_ENDPOINT = "/v1/customer/getAll";
     public static final String ACCOUNT_API_ENDPOINT = "/v1/account";
 
-    public static final String TRANSACTION_API_ENDPOINT = "/v1/trs/";
+
 
     public Instant getCurrentInstant() {
         String instantExpected = "2021-06-15T10:15:30Z";

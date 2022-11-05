@@ -5,6 +5,9 @@ import com.Omer.Account.repository.CustomerRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashSet;
 
@@ -24,6 +27,12 @@ public class AccountApplication implements CommandLineRunner {
 	}
 
 
+	@Bean
+	public PasswordEncoder getPasswordEncoder(){
+
+		return new BCryptPasswordEncoder(10);
+
+	}
 	@Override
 	public void run(String... args) throws Exception // program ayağı kalkareken çalışacak olan metod
 	{

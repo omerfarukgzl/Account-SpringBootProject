@@ -69,6 +69,44 @@ Account-api her almış olduğu istekte bu tokenın doğruluğunu ve ttl sini ko
 eğer valid se istek yapılır ve geriye result dönülür.
 
 
+
+Not:
+authentication : username password doğrumu
+authorization : userın işleme yetkisi varmı
+
+
+
+******************* Spring Security Starting ***************
+
+Basic Config:Inmemory olarak yapacağız
+öncelikle dependency ekliyoruz
+
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-security</artifactId>
+	</dependency>
+
+Daha sonra SecurityConfig  configuration ekliyoruz.
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     */
 }
 
