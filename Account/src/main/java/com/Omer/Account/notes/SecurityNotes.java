@@ -202,7 +202,7 @@ Bu açığı kapatmak için https protoklü kullanarak mesajı şifreleyip gönd
 
 
 
-
+*Jwt filter : her gelen istek jwt filte'e girer bu filterleme işleminden sonra ilgili controller lara gider
 
 
 
