@@ -129,6 +129,156 @@ Daha sonra SecurityConfig  configuration ekliyoruz.
 
 
 
+ ****************************************************************************************************************************************
+
+JWt Nedir:
+
+( Json Web Token )
+
+ JWT token request response ların üzerinde servera giden isteklerin aynı kişiden gidip gitmediğini doğrulayan bir yöntem.
+
+JWT token 3 parçadan oluşur(3 noktayla ayrılmış karmaşık string bir mesaj)
+     Parçalar sırası ile:
+     -Header : Şifreleme algoritmasının ne olduğu belirtilir
+     -Payload : Bizim istediğimiz data ve iat: tarih alanı(token ne zaman oluşturuldu)
+     -Signature : sunucunun imzası(headerın base64encoder,payload base64encoder,sunucu tarafında şifrelenen kod (tek yönlü: bir daha oluşmuyor)
+
+Client username@password ile server'a doğrulama isteğ attığında server bize jwt token oluşturur ve geri döner.
+Daha sonra Sunucuya gönderilecek isteklerde HTTP Header içerisinde alınan bu token gönderilir ve server dan cevap gelir.
+
+!!
+JWT nin güvenlik açığı: JWT tokenın amacı isteğin doğru client tarafından gelip gelmediğini analamak
+Bu nedenle bu token başkası tarafından bizim tarafımızdan kullanılabilir.
+Bu açığı kapatmak için https protoklü kullanarak mesajı şifreleyip gönderirsek tokenın çalınmasını engelleyeibilirz
+
+
+
+
+       Client                         JWT Filter                     AUTH Controller                          SpringAuthManager                        UseDetailsService                              Token Manager
+         |          HTTP POST             |                                    |                                      |                                        |                                           |
+         |------------------------------->                                     |                                      |                                        |                                           |
+         |  username@password doğrulama   |                                    |                                      |                                        |                                           |
+         |                                |                                    |                                      |                                        |                                           |
+         |                     Token varmı/Token Doğrumu                       |                                      |                                        |                                           |
+         |                                |                                    |                                      |                                        |                                           |
+         |                                |            Token Oluştur           |                                      |                                        |                                           |
+         |                                |----------------------------------->|                                      |                                        |                                           |   Token Oluştur(fonksiyon a)
+         |                                |                                    |      username@password doğrula       |                                        |                                           |
+         |                                |                                    | ---------------------------------->  |                                        |                                           |
+         |                                |                                    |                                      |           loadUserByUsername           |                                           |   Token Kontrol Et (fonksiyon b )
+         |                                |                                    |                                      |--------------------------------------> |                                           |
+         |                                |                                    |                                      |         username i doğrulamak için     |    Database                               |
+         |                                |                                    |                                      |         username 'i repository e sor   |                                           |   User Dan Token Al (fonksiyon c)
+         |                                |                                    |                                      |                                        |                                           |
+         |                                |                                    |                                      |                                        |                                           |
+                                          |                                    |       Doğrulama yapıldı(true)        |                                        |                                           |
+         |                                |                                    |<-------------------------------------|                                        |                                           |
+         |                                |                                    |                                      |                                        |                                           |
+         |                                |                               Token Oluştur                               |                                        |                                           |
+         |                                |                          (fonksiyon a çağırılır)                          |                                        |                                           |
+         |                                |                                    |                                      |                                        |                                           |
+         |                                |                                    |                                      |                                        |                                           |
+         |                                |               JWT Token            |                                      |                                        |                                           |
+         |                                | <----------------------------------|                                      |                                        |                                           |
+         |          JWT Token             |                                    |                                      |                                        |                                           |
+         |<-------------------------------|                                    |                                      |                                        |                                           |
+         |                                |                                    |                                      |                                        |                                           |
+         |                                |                                    |                                      |                                        |                                           |
+         |       HTTP Request (Token)     |                                    |                                      |                                        |                                           |
+         |-------------------------------->            (fonksiyon b)           |                                      |                                        |                                           |
+         |                                |            Token Doğrula           |                                      |                                        |                                           |
+         |                                |----------------------------------->|                                      |                                        |                                           |
+         |                                |                                    |                                      |                                        |                                           |
+         |                                |                                    |                          Kullanıcı Doğrula (LoadUserBy                        |                                           |
+         |                                |                                    |------------------------------------------------------------------------------>|                                           |
+         |                                |                                    |                                      |                                        |   Database                                |
+         |                                |                                    |                                    VALID                                      |                                           |
+         |                                |      (istek atılan controller)     |<----------------------------------------------------------------------------->|                                           |
+         |                                |     İlgili Controller Çalıştır     |                                                                               |                                           |
+         |            Response            |<-----------------------------------|                                                                               |                                           |
+         |<------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

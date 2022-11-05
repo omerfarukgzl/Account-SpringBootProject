@@ -2,6 +2,7 @@ package com.Omer.Account.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -48,7 +49,8 @@ public class SecurityConfig {
         http.authorizeHttpRequests()
                 .antMatchers("/v1/account/trs").hasRole("ADMIN")
                 .antMatchers("/v1/account").hasRole("USER")
-                .antMatchers("/v1/customer/**").hasRole("USER")
+                .antMatchers(HttpMethod.GET,"/v1/customer/**").hasRole("USER")
+              //  .antMatchers("/v1/customer/**").authenticated()//username@passord doğruysa girsin rollerle gerek yok
                 .and().formLogin()
                 .and().csrf().disable();//bir username password isteği geldiği zaman başkası o linki kullanıp giremesin arada cookie olsun.güvenlik açığı olur yapmazsak
         return http.build();
