@@ -161,7 +161,7 @@ Bu açığı kapatmak için https protoklü kullanarak mesajı şifreleyip gönd
          |                                |                                    |                                      |                                        |                                           |
          |                     Token varmı/Token Doğrumu                       |                                      |                                        |                                           |
          |                                |                                    |                                      |                                        |                                           |
-         |                                |            Token Oluştur           |                                      |                                        |                                           |
+         |                                |            Token Oluştur           |                                      |                                        |                                           |    Methodlar:
          |                                |----------------------------------->|                                      |                                        |                                           |   Token Oluştur(fonksiyon a)
          |                                |                                    |      username@password doğrula       |                                        |                                           |
          |                                |                                    | ---------------------------------->  |                                        |                                           |
@@ -204,6 +204,118 @@ Bu açığı kapatmak için https protoklü kullanarak mesajı şifreleyip gönd
 
 *Jwt filter : her gelen istek jwt filte'e girer bu filterleme işleminden sonra ilgili controller lara gider
 
+JSWT Codding Start:
+
+*************************************** Dependency ******************************
+Öncelikle dependency eklenir
+
+       <dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt</artifactId>
+			<version>0.9.1</version>
+		</dependency>
+
+
+
+
+
+*************************************** JWT Token Manager ******************************
+
+Daha sonra Jwt Token Manager oluşturduk:
+
+@Service
+public class TokenManager {
+
+
+        private final String SECRET_KEY = "omerfarukgzl";//şifrelenicek olan anahtar değeri
+
+
+userDetails objesini alır. createToken metoduna gönderir.
+         public String generateToken(UserDetails userDetails) {
+          Map<String, Object> claims = new HashMap<>();
+          return createToken(claims, userDetails.getUsername());
+         }
+
+         private String createToken(Map<String, Object> claims, String subject) {
+          return Jwts.builder().setClaims(claims)
+                  .setSubject(subject) // username
+                  .setIssuer("Omer")//kim tarafından oluşturuldu
+                  .setIssuedAt(new Date(System.currentTimeMillis())) // oluşturulma zamanı
+                  .setExpiration(new Date(System.currentTimeMillis() + 5 * 60 * 60 * 1000)) // geçerlilik süresi
+                  .signWith(SignatureAlgorithm.HS256, SECRET_KEY) // kullanılan algoritma ve bu algoritma çalışırken kullanılacak hash key değeri
+                  .compact();
+         }
+
+
+token hala geçerli mi? kullanıcı adı doğru ise ve token ın geçerlilik süresi devam ediyorsa true döner.
+         public Boolean validateToken(String token, UserDetails userDetails) {
+          // Username and token süresi Valid ise return true
+          final String username = extractUsername(token);
+          return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+         }
+
+
+
+verilen token a ait kullanıcı adını döndürür.
+         public String extractUsername(String token) {
+          //return token's user name
+          return extractClaim(token, Claims::getSubject);
+         }
+
+verilen token a ait token bitiş süresini verir.
+         public Date extractExpiration(String token) {
+          //return token's bitiş süresi
+          return extractClaim(token, Claims::getExpiration);
+         }
+
+
+token ın geçerlilik süre doldu mu?
+         private Boolean isTokenExpired(String token) {
+          //nowDate token bitiş tarihinden önce ise return true
+          return extractExpiration(token).before(new Date());
+         }
+
+
+istenilen token bilgilerini çöz ve istenilen bilgiyi geri döndürür
+         public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+          final Claims claims = extractAllClaims(token);
+          return claimsResolver.apply(claims);
+         }
+
+verilen token a ait bilgi alanlarını çöz ve tüm alanları geri döndür
+         private Claims extractAllClaims(String token) {
+          //şifrelenen gizli anahtarı kullanarak istenilen token bilgisini parçala ve paraçalan kısmı döndür
+          return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+         }
+
+
+}
+
+
+
+
+
+*************************************** UserDetails ******************************
+
+
+Daha sonra UserDetailsService Service ini oluşturduk.
+* Springin bize sağladığı userDetailsService interface ini implement ettik
+ve bu implement sonucu loadUserByUsername fonksiyonunu override ettik
+override edilen bu fonksiyonda db ile konuşarak (kullanıcı yetkilerini ve kullanıcıları db yerine bir hashmap te tutacağız)
+bu kullanıcı varsa bize bu kullanıcıyı dön (spring security nin User özelliği)
+
+
+        @Service
+        public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
+
+            @Autowired
+            AuthUserMockDb authUser;
+
+            @Override
+            public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+                return authUser.getUserByUsername(username);
+            }
+}
 
 
 
@@ -212,17 +324,16 @@ Bu açığı kapatmak için https protoklü kullanarak mesajı şifreleyip gönd
 
 
 
+*************************************** Filter ******************************
 
 
 
+Daha sonra Token Fiter Service ini oluşturudk
 
+!! Bu service her bir isteğe bakabilmesi , her gelen isteği filtereleyip sonra geçirebilmesi için OncePerRequestFilter türetilmesi gerekir
 
-
-
-
-
-
-
+Token Header, istek gelirken Authorization keyinden Bearer 123jdwjabd33 value şeklinde gelir.
+Bizim tokenla işlem yapabilmemiz için token headrı bir değişkende tutup onu parse etmemiz gerekir.
 
 
 
