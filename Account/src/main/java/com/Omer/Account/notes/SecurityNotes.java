@@ -88,7 +88,44 @@ Basic Config:Inmemory olarak yapacağız
 
 Daha sonra SecurityConfig  configuration ekliyoruz.
 
-}
+ @Bean
+    protected InMemoryUserDetailsManager configureAuthentication()
+    {
+        String passwordUser= "User1234";
+        String passwordAdmin ="Admin1234";
+
+        UserDetails user = User.builder()
+                .username("user")
+                .password(passwordEncoder.encode(passwordUser))
+                .roles("USER")
+                .build();
+        UserDetails admin = User.builder()
+                .username("admin")
+                .password(passwordEncoder.encode(passwordAdmin))
+                .roles("USER", "ADMIN")
+                .build();
+
+        return new InMemoryUserDetailsManager(user,admin);
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests()
+                .antMatchers("/v1/account/trs").hasRole("ADMIN")
+                .antMatchers("/v1/account").hasRole("USER")
+                .antMatchers("/v1/customer/**").hasRole("USER")
+                .and().formLogin();
+        return http.build();
+
+   }
+
+
+   Bu configuration da Authorization ve Authentication işlemleri yaptık
+
+   Authorization methodunda gelen http isteklerine url bazında rol odaklı yetkilendirme işlemleri gerçekleştirdik.
+   Authentication methodunda ise Yetkilendirme yapacağımız rolleri username ve password bilgilerini Securitynin bize sağlamış olduğu
+     User classını oluşturarakn ekledik. Daha sonra bu User bilgilerini Inmemory de sakladik.(password bilgisini encoder ladık)
+
 
 
 
