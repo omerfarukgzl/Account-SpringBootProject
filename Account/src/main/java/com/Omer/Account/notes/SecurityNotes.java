@@ -326,8 +326,6 @@ bu kullanıcı varsa bize bu kullanıcıyı dön (spring security nin User özel
 
 *************************************** Filter ******************************
 
-
-
 Daha sonra Token Fiter Service ini oluşturudk
 
 !! Bu service her bir isteğe bakabilmesi , her gelen isteği filtereleyip sonra geçirebilmesi için OncePerRequestFilter türetilmesi gerekir
@@ -337,6 +335,7 @@ Bizim tokenla işlem yapabilmemiz için token headrı bir değişkende tutup onu
 
 
 
+*************************************************************************************************************************************************************************************************
 
 
 
@@ -350,13 +349,28 @@ Bizim tokenla işlem yapabilmemiz için token headrı bir değişkende tutup onu
 
 
 
+****************************************************** OAUTH2  Security  *************************************************************************
 
 
+                                                        Authorization Grant
+                                                  |---------------------------------------->  Authorization
+                  Authorization Request           |            Acces Token                      Server
+              ---------------------------->       |   <--------------------------------------
+
+   Kullanıcı                                    Client
+                                                  |              Protected Resource
+                   Authorization Grant            |   <--------------------------------------
+              <----------------------------       |                                           Resource
+                                                  ------------------------------------------->
+                                                                     Acces Token
+
+Kullanıcı : yetkilendirilen kişidir
+Client App: Facebook login, Github Login vs Veya kendi yazmış olduğumuz client
+Authorization Server: FaceBook login server,Google login server ( FaceBook yetkilendirme sunucusu)
+Resource Server:FaceBook kullanıcısı gönderielerinin saklı olduğu sunucu
 
 
-
-
-
+Yani Facebook ile login ol sayfasına aktarıcaktır gerekli conf lardan sonra
 
 
 
