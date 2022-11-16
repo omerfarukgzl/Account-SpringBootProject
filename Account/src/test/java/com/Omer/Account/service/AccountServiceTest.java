@@ -11,8 +11,8 @@ import com.Omer.Account.model.TransactionType;
 import com.Omer.Account.repository.AccountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+import org.springframework.kafka.core.KafkaTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -32,11 +32,15 @@ public class AccountServiceTest extends TestSupport{
     private AccountDtoConverter converter;
     private TransactionService transactionService;
 
+    private KafkaTemplate<String, String> kafkaTemplate;
+
     private final   Customer customer = generateCustomer();
 
     private final AccountCustomerDto accountCustomerDto = new AccountCustomerDto("customer-id",
             "customer-name",
             "customer-surname");
+
+
     //private final Customer customer = new Customer("12345", "customer-name", "customer-surname", Set.of());
 
     @BeforeEach
@@ -46,9 +50,9 @@ public class AccountServiceTest extends TestSupport{
         customerService = Mockito.mock(CustomerService.class);
         converter = Mockito.mock(AccountDtoConverter.class);
         transactionService=Mockito.mock(TransactionService.class);
+        kafkaTemplate = Mockito.mock(KafkaTemplate.class);
 
-
-        accountService = new AccountService(accountRepository,customerService,converter, transactionService);
+        accountService = new AccountService(accountRepository,customerService,converter, transactionService, kafkaTemplate);
 
     }
 
